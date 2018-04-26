@@ -33,10 +33,10 @@ var Firebase = function () {
     // app start
     this.db = firebase.database().ref("/data");
     this.auth = firebase.auth;
-    this.db.on('value', this._onUpdate.bind(this));
+    this.db.on("value", this._onUpdate.bind(this));
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
-    document.getElementById('login').addEventListener('click', this._onLoginClick.bind(this));
-    document.getElementById('logout').addEventListener('click', this._onLogoutClick.bind(this));
+    document.getElementById("login").addEventListener("click", this._onLoginClick.bind(this));
+    document.getElementById("logout").addEventListener("click", this._onLogoutClick.bind(this));
   }
 
   _createClass(Firebase, [{
@@ -57,27 +57,27 @@ var Firebase = function () {
     value: function setData(data) {
       this.db.set(Object.assign(this.data, data)).then(function (res) {
         console.log(res);
-        console.log('db updated');
+        console.log("db updated");
       }).catch(function (e) {
         console.log(e);
-        console.log('db update failed');
+        console.log("db update failed");
       });
     }
   }, {
     key: "_onLoginClick",
     value: function _onLoginClick() {
-      var email = document.getElementById('email').value;
-      var password = document.getElementById('password').value;
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
 
       this.auth().signInWithEmailAndPassword(email, password).then(function (res) {
         console.log(res);
-        console.log('logged in');
+        console.log("logged in");
       }).catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log(error, errorCode, errorMessage);
 
-        console.log('login failed');
+        console.log("login failed");
       });
     }
   }, {
@@ -85,10 +85,10 @@ var Firebase = function () {
     value: function _onLogoutClick() {
       this.auth().signOut().then(function (res) {
         console.log(res);
-        console.log('logged out');
+        console.log("logged out");
       }).catch(function (e) {
         console.log(e);
-        console.log('logout failed');
+        console.log("logout failed");
       });
     }
   }]);
@@ -113,8 +113,8 @@ var TimerIndicator = function () {
     this.state = {
       authenticated: false,
       startSecond: "" + 10 * 60, // Dentoo.LT Standard
-      second: '0',
-      power: 'OFF'
+      second: "0",
+      power: "OFF"
     };
 
     this.indicator = document.getElementById(this.props.id);
@@ -141,7 +141,7 @@ var TimerIndicator = function () {
   }, {
     key: "_onAuthStateChanged",
     value: function _onAuthStateChanged(user) {
-      console.log('auth changed:');
+      console.log("auth changed:");
       console.log(user);
       if (user) {
         this.setState({
@@ -183,18 +183,18 @@ var TimerIndicator = function () {
       console.log(isRunning, nowSecond, startSecond, main);
       if (isRunning) {
         if (second < parseInt(startSecond, 10) * 0.2) {
-          main.setAttribute('class', 'hurry');
+          main.setAttribute("class", "hurry");
         } else {
-          main.setAttribute('class', 'isRunning');
+          main.setAttribute("class", "isRunning");
         }
       } else {
-        main.setAttribute('class', 'notRunning');
+        main.setAttribute("class", "notRunning");
       }
 
       if (min > 0 || sec > 0) {
-        this.indicator.setAttribute('class', null);
+        this.indicator.setAttribute("class", null);
       } else {
-        this.indicator.setAttribute('class', 'end');
+        this.indicator.setAttribute("class", "end");
       }
     }
   }]);
@@ -216,7 +216,7 @@ var Button = function () {
     this.props = props;
 
     this.button = document.getElementById(this.props.id);
-    this.button.addEventListener('click', this._onClick.bind(this));
+    this.button.addEventListener("click", this._onClick.bind(this));
   }
 
   _createClass(Button, [{
@@ -266,13 +266,13 @@ var TimerInput = function () {
       var minute = parseInt(this.input.value);
       var isValid = this._isValidMinute(minute);
       if (isValid) {
-        this.input.setAttribute('class', 'valid');
+        this.input.setAttribute("class", "valid");
         this.input.blur();
 
         // pass second
         this.props.onTimeSubmit(minute * 60);
       } else {
-        this.input.setAttribute('class', 'invalid');
+        this.input.setAttribute("class", "invalid");
         this.input.focus();
       }
     }
@@ -293,34 +293,35 @@ var TimerController = function () {
       startSecond: 0,
       nowSecond: 0,
       timerId: null
+    };
 
-      // main container
-    };this.main = document.getElementById('main');
+    // main container
+    this.main = document.getElementById("main");
 
     // timer indicator
     this.timerIndicator = new TimerIndicator({
-      id: 'indicator',
+      id: "indicator",
       onDatabaseUpdate: this._onDatabaseUpdate.bind(this)
     });
 
     // time input
     this.timerInput = new TimerInput({
-      id: 'input',
+      id: "input",
       onTimeSubmit: this._resetTimer.bind(this)
     });
 
     // buttons
     this.resetButton = new Button({
-      id: 'resetButton',
+      id: "resetButton",
       onClick: this._onPressResetButton.bind(this)
     });
 
     this.startStopButton = new Button({
-      id: 'startStopButton',
+      id: "startStopButton",
       onClick: this._switchTimer.bind(this)
     });
 
-    document.addEventListener('keydown', this._onKeydown.bind(this));
+    document.addEventListener("keydown", this._onKeydown.bind(this));
   }
 
   _createClass(TimerController, [{
@@ -338,35 +339,35 @@ var TimerController = function () {
 
       // no timer operations if inputting
       if (document.activeElement === input) {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
           this.timerInput.onSubmit();
         }
         return;
       }
 
       var keydownOperations = {
-        ' ': function _() {
+        " ": function _() {
           _this._switchTimer();
         },
-        's': function s() {
+        "s": function s() {
           _this._switchTimer();
         },
-        'Escape': function Escape() {
+        "Escape": function Escape() {
           _this._resetTimer(_this.state.startSecond);
         },
-        'r': function r() {
+        "r": function r() {
           _this._resetTimer(_this.state.startSecond);
         },
-        'ArrowRight': function ArrowRight() {
+        "ArrowRight": function ArrowRight() {
           _this._modifySecond(-10);
         },
-        'ArrowLeft': function ArrowLeft() {
+        "ArrowLeft": function ArrowLeft() {
           _this._modifySecond(10);
         },
-        'ArrowDown': function ArrowDown() {
+        "ArrowDown": function ArrowDown() {
           _this._modifySecond(-1);
         },
-        'ArrowUp': function ArrowUp() {
+        "ArrowUp": function ArrowUp() {
           _this._modifySecond(1);
         }
       };
@@ -388,7 +389,7 @@ var TimerController = function () {
     key: "_onDatabaseUpdate",
     value: function _onDatabaseUpdate(data) {
       this.setState({
-        isRunning: data.power === 'ON',
+        isRunning: data.power === "ON",
         startSecond: parseInt(data.startSecond, 10)
       });
       this._updateView();
@@ -438,7 +439,7 @@ var TimerController = function () {
       if (this.state.nowSecond > 0) {
         this.state.isRunning = true;
         this.timerIndicator.fb.setData({
-          power: 'ON'
+          power: "ON"
         });
 
         this.state.timerId = setInterval(function () {
@@ -463,7 +464,7 @@ var TimerController = function () {
       clearInterval(this.state.timerId);
       this.state.isRunning = false;
       this.timerIndicator.fb.setData({
-        power: 'OFF'
+        power: "OFF"
       });
 
       this._updateView();
