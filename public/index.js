@@ -21,12 +21,12 @@ var Firebase = function () {
 
     // Initialize Firebase
     var config = {
-      apiKey: "AIzaSyDMdU74_4W-TmlYTPGWnE3-GM78rqKpey8",
-      authDomain: "hoga-initial-cb665.firebaseapp.com",
-      databaseURL: "https://hoga-initial-cb665.firebaseio.com",
-      projectId: "hoga-initial-cb665",
-      storageBucket: "hoga-initial-cb665.appspot.com",
-      messagingSenderId: "429242556385"
+      apiKey: "AIzaSyBqWQysX_EMyRY_g5CnXi6aUCQnIU_SnBY",
+      authDomain: "shared-lt-timer.firebaseapp.com",
+      databaseURL: "https://shared-lt-timer.firebaseio.com",
+      projectId: "shared-lt-timer",
+      storageBucket: "shared-lt-timer.appspot.com",
+      messagingSenderId: "482122259784"
     };
     firebase.initializeApp(config);
 
@@ -338,7 +338,7 @@ var TimerController = function () {
       var _this = this;
 
       // no timer operations if inputting
-      if (document.activeElement === input) {
+      if (document.activeElement === this.input) {
         if (e.key === "Enter") {
           this.timerInput.onSubmit();
         }
