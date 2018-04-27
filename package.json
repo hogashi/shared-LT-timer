@@ -8,7 +8,8 @@
     "watch": "babel --watch src -d public",
     "build": "babel src -d public",
     "lint": "eslint src",
-    "fix": "eslint --fix src"
+    "fix": "eslint --fix src",
+    "serve": "npm run build && firebase serve"
   },
   "author": "hogashi",
   "license": "ISC",
