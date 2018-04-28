@@ -10,7 +10,9 @@
 class Firebase {
   constructor(props) {
     this.props = props;
-
+    this.state = {
+      showLoginForm: false,
+    };
 
     // Initialize Firebase
     const config = {
@@ -32,10 +34,15 @@ class Firebase {
     this.login.addEventListener("click", this._onLoginClick.bind(this));
     this.logout = document.getElementById("logout");
     this.logout.addEventListener("click", this._onLogoutClick.bind(this));
-    this.loginForm = document.getElementById("loginContainer");
-    this.loginForm.addEventListener("c", this._onLogoutClick.bind(this));
+    this.loginForm = document.getElementById("loginForm");
+    // this.loginForm.addEventListener("click", this._onLoginFormClick.bind(this));
+    this.loginInput = document.getElementById("loginInput");
+    this.loginFormButton = document.getElementById("loginFormButton");
+    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
+  }
 
-    this.updateView(false);
+  setState(state) {
+    this.state = Object.assign(this.state, state);
   }
 
   _onUpdate(snapshot) {
@@ -59,6 +66,13 @@ class Firebase {
         console.log(e);
         console.log("db update failed");
       });
+  }
+
+  _onLoginFormButtonClick() {
+    this.setState({
+      showLoginForm: !this.state.showLoginForm,
+    });
+    this.updateView(this.state.authenticated);
   }
 
   _onLoginClick() {
@@ -92,16 +106,18 @@ class Firebase {
   }
 
   updateView(authenticated) {
+    this.setState({authenticated});
     if (authenticated) {
+      this.loginInput.style.display = "none";
       this.login.style.display = "none";
       this.logout.style.display = "block";
-      this.loginForm.style.display = "none";
     }
     else {
+      this.loginInput.style.display = "block";
       this.login.style.display = "block";
       this.logout.style.display = "none";
-      this.loginForm.style.display = "block";
     }
+    this.loginForm.style.display = this.state.showLoginForm ? "block" : "none";
   }
 }
 
@@ -153,6 +169,7 @@ class TimerIndicator {
         authenticated: false,
       });
     }
+    this.fb.updateView(this.state.authenticated);
   }
 
   _onDatabaseUpdate(data) {
@@ -195,6 +212,8 @@ class TimerIndicator {
     else {
       this.indicator.setAttribute("class", "end");
     }
+
+    this.fb.updateView(this.state.authenticated);
   }
 }
 

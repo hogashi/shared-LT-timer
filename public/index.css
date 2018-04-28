@@ -55,6 +55,15 @@ button {
   background: #fff;
   border: 2px solid #000;
 }
+#login {
+  display: block;
+}
+#logout {
+  display: none;
+}
+#loginForm {
+  display: none;
+}
 #indicator {
   flex: 0 1 auto;
   display: flex;

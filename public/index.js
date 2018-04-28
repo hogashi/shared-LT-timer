@@ -18,6 +18,9 @@ var Firebase = function () {
     _classCallCheck(this, Firebase);
 
     this.props = props;
+    this.state = {
+      showLoginForm: false
+    };
 
     // Initialize Firebase
     var config = {
@@ -39,13 +42,19 @@ var Firebase = function () {
     this.login.addEventListener("click", this._onLoginClick.bind(this));
     this.logout = document.getElementById("logout");
     this.logout.addEventListener("click", this._onLogoutClick.bind(this));
-    this.loginForm = document.getElementById("loginContainer");
-    this.loginForm.addEventListener("c", this._onLogoutClick.bind(this));
-
-    this.updateView(false);
+    this.loginForm = document.getElementById("loginForm");
+    // this.loginForm.addEventListener("click", this._onLoginFormClick.bind(this));
+    this.loginInput = document.getElementById("loginInput");
+    this.loginFormButton = document.getElementById("loginFormButton");
+    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
   }
 
   _createClass(Firebase, [{
+    key: "setState",
+    value: function setState(state) {
+      this.state = Object.assign(this.state, state);
+    }
+  }, {
     key: "_onUpdate",
     value: function _onUpdate(snapshot) {
       var val = snapshot.val();
@@ -68,6 +77,14 @@ var Firebase = function () {
         console.log(e);
         console.log("db update failed");
       });
+    }
+  }, {
+    key: "_onLoginFormButtonClick",
+    value: function _onLoginFormButtonClick() {
+      this.setState({
+        showLoginForm: !this.state.showLoginForm
+      });
+      this.updateView(this.state.authenticated);
     }
   }, {
     key: "_onLoginClick",
@@ -100,15 +117,17 @@ var Firebase = function () {
   }, {
     key: "updateView",
     value: function updateView(authenticated) {
+      this.setState({ authenticated: authenticated });
       if (authenticated) {
+        this.loginInput.style.display = "none";
         this.login.style.display = "none";
         this.logout.style.display = "block";
-        this.loginForm.style.display = "none";
       } else {
+        this.loginInput.style.display = "block";
         this.login.style.display = "block";
         this.logout.style.display = "none";
-        this.loginForm.style.display = "block";
       }
+      this.loginForm.style.display = this.state.showLoginForm ? "block" : "none";
     }
   }]);
 
@@ -171,6 +190,7 @@ var TimerIndicator = function () {
           authenticated: false
         });
       }
+      this.fb.updateView(this.state.authenticated);
     }
   }, {
     key: "_onDatabaseUpdate",
@@ -215,6 +235,8 @@ var TimerIndicator = function () {
       } else {
         this.indicator.setAttribute("class", "end");
       }
+
+      this.fb.updateView(this.state.authenticated);
     }
   }]);
 
