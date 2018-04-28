@@ -191,7 +191,6 @@ var TimerIndicator = function () {
         this.fb.setData({
           second: "" + second
         });
-        this.timerInput.updateView();
       } else {
         second = parseInt(this.state.second, 10);
       }
@@ -358,7 +357,7 @@ var TimerController = function () {
       var _this = this;
 
       // no timer operations if inputting
-      if (document.activeElement === this.input) {
+      if (document.activeElement === this.timerInput.input) {
         if (e.key === "Enter") {
           this.timerInput.onSubmit();
         }
