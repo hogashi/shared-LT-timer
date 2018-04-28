@@ -28,7 +28,7 @@ html, body {
   align-items: center;
   font-size: 40px;
 }
-#input {
+#minuteInput {
   display: block;
   flex: 0 1 auto;
   width: 150px;

@@ -35,8 +35,14 @@ var Firebase = function () {
     this.auth = firebase.auth;
     this.db.on("value", this._onUpdate.bind(this));
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
-    document.getElementById("login").addEventListener("click", this._onLoginClick.bind(this));
-    document.getElementById("logout").addEventListener("click", this._onLogoutClick.bind(this));
+    this.login = document.getElementById("login");
+    this.login.addEventListener("click", this._onLoginClick.bind(this));
+    this.logout = document.getElementById("logout");
+    this.logout.addEventListener("click", this._onLogoutClick.bind(this));
+    this.loginForm = document.getElementById("loginContainer");
+    this.loginForm.addEventListener("c", this._onLogoutClick.bind(this));
+
+    this.updateView(false);
   }
 
   _createClass(Firebase, [{
@@ -90,6 +96,19 @@ var Firebase = function () {
         console.log(e);
         console.log("logout failed");
       });
+    }
+  }, {
+    key: "updateView",
+    value: function updateView(authenticated) {
+      if (authenticated) {
+        this.login.style.display = "none";
+        this.logout.style.display = "block";
+        this.loginForm.style.display = "none";
+      } else {
+        this.login.style.display = "block";
+        this.logout.style.display = "none";
+        this.loginForm.style.display = "block";
+      }
     }
   }]);
 
@@ -172,6 +191,7 @@ var TimerIndicator = function () {
         this.fb.setData({
           second: "" + second
         });
+        this.timerInput.updateView();
       } else {
         second = parseInt(this.state.second, 10);
       }
@@ -306,7 +326,7 @@ var TimerController = function () {
 
     // time input
     this.timerInput = new TimerInput({
-      id: "input",
+      id: "minuteInput",
       onTimeSubmit: this._resetTimer.bind(this)
     });
 

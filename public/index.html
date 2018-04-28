@@ -3,18 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/4.13.0/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/4.13.0/firebase-auth.js"></script>
-    <script defer src="/__/firebase/4.13.0/firebase-database.js"></script>
-    <script defer src="/__/firebase/4.13.0/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/4.13.0/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
-
+    <title>shared-LT-timer</title>
     <link rel="stylesheet" href="./index.css">
   </head>
   <body>
@@ -22,9 +11,19 @@
     <main id="main">
       <div id="interaction">
         minute(s):
-        <input id="input" class="" type="text" placeholder="1~99" />
-        <button id="resetButton">[re]<br>set</button>
-        <button id="startStopButton">start<br>stop</button>
+        <input id="minuteInput" type="text" placeholder="1~99" />
+        <div id="buttonConntainer">
+          <button id="resetButton">[re]<br>set</button>
+          <button id="startStopButton">start<br>stop</button>
+        </div>
+        <div id="loginContainer">
+          <button id="login">login</button>
+          <button id="logout">logout</button>
+          <div id="loginform">
+            <div><input id="email" type="text"></div>
+            <div><input id="password" type="password"></div>
+          </div>
+        </div>
       </div>
       <div id="indicator">
         00:00
@@ -37,18 +36,18 @@
       </div>
     </main>
 
-    <div id="loginform">
-      <ul>
-        <li><input id="email" type="text"></li>
-        <li><input id="password" type="password"></li>
-        <li><button id="login">login</button></li>
-        <li><button id="logout">logout</button></li>
-      </ul>
-    </div>
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/4.13.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/4.13.0/firebase-auth.js"></script>
+    <script defer src="/__/firebase/4.13.0/firebase-database.js"></script>
+    <script defer src="/__/firebase/4.13.0/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/4.13.0/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+    <script src="./index.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
-<script src="./index.js"></script>
-
-</body>
+  </body>
 </html>

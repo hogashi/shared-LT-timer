@@ -9,6 +9,7 @@
     "build": "babel src -d public",
     "lint": "eslint src",
     "fix": "eslint --fix src",
+    "serve-dev": "npm run watch && firebase serve",
     "serve": "npm run build && firebase serve"
   },
   "author": "hogashi",
