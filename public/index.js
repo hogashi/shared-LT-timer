@@ -19,7 +19,7 @@ var Firebase = function () {
 
     this.props = props;
     this.state = {
-      authenticated: 'init',
+      authenticated: false,
       showLoginForm: false
     };
 

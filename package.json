@@ -9,14 +9,13 @@
     "build": "babel src -d public",
     "lint": "eslint src",
     "fix": "eslint --fix src",
-    "serve-dev": "npm run watch && firebase serve",
     "serve": "npm run build && firebase serve"
   },
   "author": "hogashi",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^4.19.1"
   }
 }

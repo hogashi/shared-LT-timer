@@ -11,7 +11,7 @@ class Firebase {
   constructor(props) {
     this.props = props;
     this.state = {
-      authenticated: 'init',
+      authenticated: false,
       showLoginForm: false,
     };
 
@@ -136,7 +136,7 @@ class Firebase {
   }
 
   _updateView() {
-    this.updateView(this.state.authenticated)
+    this.updateView(this.state.authenticated);
   }
 
   updateView(authenticated) {
