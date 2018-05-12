@@ -11,6 +11,7 @@ class Firebase {
   constructor(props) {
     this.props = props;
     this.state = {
+      authenticated: 'init',
       showLoginForm: false,
     };
 
@@ -30,15 +31,20 @@ class Firebase {
     this.auth = firebase.auth;
     this.db.on("value", this._onUpdate.bind(this));
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
+    this.operationButton = document.getElementById("buttonContainer");
+    this.loginFormButton = document.getElementById("loginFormButton");
+    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
+    this.loginModal = document.getElementById("loginModal");
+    this.loginForm = document.getElementById("loginForm");
+    this.loginFormMessage = document.getElementById("loginFormMessage");
+    this.loginInput = document.getElementById("loginInput");
     this.login = document.getElementById("login");
     this.login.addEventListener("click", this._onLoginClick.bind(this));
     this.logout = document.getElementById("logout");
     this.logout.addEventListener("click", this._onLogoutClick.bind(this));
-    this.loginForm = document.getElementById("loginForm");
-    // this.loginForm.addEventListener("click", this._onLoginFormClick.bind(this));
-    this.loginInput = document.getElementById("loginInput");
-    this.loginFormButton = document.getElementById("loginFormButton");
-    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
+    this.loginFormExitButton = document.getElementById("loginFormExitButton");
+    this.loginFormExitButton.addEventListener("click", this._onLoginFormExitButtonClick.bind(this));
+    this.operationDescription = document.getElementById("description");
   }
 
   setState(state) {
@@ -72,52 +78,89 @@ class Firebase {
     this.setState({
       showLoginForm: !this.state.showLoginForm,
     });
-    this.updateView(this.state.authenticated);
+    this._updateView();
   }
 
   _onLoginClick() {
     const email    = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    this.auth().signInWithEmailAndPassword(email, password)
-      .then(res => {
-        console.log(res);
-        console.log("logged in");
-      })
-      .catch(function(error) {
-        const errorCode    = error.code;
-        const errorMessage = error.message;
-        console.log(error, errorCode, errorMessage);
+    this.loginForm.style.display = "none";
+    this.loginFormMessage.innerHTML = "wait...";
 
-        console.log("login failed");
-      });
+    this.auth().signInWithEmailAndPassword(email, password)
+      .then(
+        res => {
+          console.log(res);
+          console.log("logged in");
+          this._onLoginFormExitButtonClick();
+        },
+        error => {
+          const errorCode    = error.code;
+          const errorMessage = error.message;
+          console.log(error, errorCode, errorMessage);
+
+          console.log("login failed");
+          this._updateView();
+        }
+      );
   }
 
   _onLogoutClick() {
+    this.loginForm.style.display = "none";
+    this.loginFormMessage.innerHTML = "wait...";
+
     this.auth().signOut()
-      .then(res => {
-        console.log(res);
-        console.log("logged out");
-      })
-      .catch(e => {
-        console.log(e);
-        console.log("logout failed");
-      });
+      .then(
+        res => {
+          console.log(res);
+          console.log("logged out");
+          this._onLoginFormExitButtonClick();
+        },
+        error => {
+          const errorCode    = error.code;
+          const errorMessage = error.message;
+          console.log(error, errorCode, errorMessage);
+
+          console.log("logout failed");
+          this._updateView();
+        }
+      );
+  }
+
+  _onLoginFormExitButtonClick() {
+    this.setState({
+      showLoginForm: false,
+    });
+    this._updateView();
+  }
+
+  _updateView() {
+    this.updateView(this.state.authenticated)
   }
 
   updateView(authenticated) {
-    this.setState({authenticated});
+    this.setState({ authenticated });
     if (authenticated) {
+      this.operationButton.style.display = "flex";
+      this.loginFormButton.innerHTML = "logout";
       this.loginInput.style.display = "none";
       this.login.style.display = "none";
       this.logout.style.display = "block";
+      this.operationDescription.style.display = "flex";
     }
     else {
+      this.operationButton.style.display = "none";
+      this.loginFormButton.innerHTML = "login";
       this.loginInput.style.display = "block";
       this.login.style.display = "block";
       this.logout.style.display = "none";
+      this.operationDescription.style.display = "none";
     }
-    this.loginForm.style.display = this.state.showLoginForm ? "block" : "none";
+
+    this.loginForm.style.display = "flex";
+    this.loginFormMessage.innerHTML = "";
+    this.loginModal.style.display = this.state.showLoginForm ? "flex" : "none";
   }
 }
 
@@ -289,6 +332,8 @@ class TimerController {
 
     // main container
     this.main = document.getElementById("main");
+    // minute input
+    this.minuteInput = document.getElementById("minuteInput");
 
     // timer indicator
     this.timerIndicator =
@@ -369,6 +414,10 @@ class TimerController {
 
   // update the timer view with the state
   _updateView() {
+    const { authenticated, startSecond } = this.state;
+    if (!authenticated) {
+      this.minuteInput.value = Math.floor(startSecond / 60);
+    }
     this.timerIndicator.updateView(
       Object.assign(this.state, { main: this.main })
     );
@@ -443,5 +492,3 @@ class TimerController {
 }
 
 const lttimer = new TimerController();
-
-

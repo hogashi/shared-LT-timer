@@ -19,6 +19,7 @@ var Firebase = function () {
 
     this.props = props;
     this.state = {
+      authenticated: 'init',
       showLoginForm: false
     };
 
@@ -38,15 +39,20 @@ var Firebase = function () {
     this.auth = firebase.auth;
     this.db.on("value", this._onUpdate.bind(this));
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
+    this.operationButton = document.getElementById("buttonContainer");
+    this.loginFormButton = document.getElementById("loginFormButton");
+    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
+    this.loginModal = document.getElementById("loginModal");
+    this.loginForm = document.getElementById("loginForm");
+    this.loginFormMessage = document.getElementById("loginFormMessage");
+    this.loginInput = document.getElementById("loginInput");
     this.login = document.getElementById("login");
     this.login.addEventListener("click", this._onLoginClick.bind(this));
     this.logout = document.getElementById("logout");
     this.logout.addEventListener("click", this._onLogoutClick.bind(this));
-    this.loginForm = document.getElementById("loginForm");
-    // this.loginForm.addEventListener("click", this._onLoginFormClick.bind(this));
-    this.loginInput = document.getElementById("loginInput");
-    this.loginFormButton = document.getElementById("loginFormButton");
-    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
+    this.loginFormExitButton = document.getElementById("loginFormExitButton");
+    this.loginFormExitButton.addEventListener("click", this._onLoginFormExitButtonClick.bind(this));
+    this.operationDescription = document.getElementById("description");
   }
 
   _createClass(Firebase, [{
@@ -84,50 +90,89 @@ var Firebase = function () {
       this.setState({
         showLoginForm: !this.state.showLoginForm
       });
-      this.updateView(this.state.authenticated);
+      this._updateView();
     }
   }, {
     key: "_onLoginClick",
     value: function _onLoginClick() {
+      var _this = this;
+
       var email = document.getElementById("email").value;
       var password = document.getElementById("password").value;
+
+      this.loginForm.style.display = "none";
+      this.loginFormMessage.innerHTML = "wait...";
 
       this.auth().signInWithEmailAndPassword(email, password).then(function (res) {
         console.log(res);
         console.log("logged in");
-      }).catch(function (error) {
+        _this._onLoginFormExitButtonClick();
+      }, function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log(error, errorCode, errorMessage);
 
         console.log("login failed");
+        _this._updateView();
       });
     }
   }, {
     key: "_onLogoutClick",
     value: function _onLogoutClick() {
+      var _this2 = this;
+
+      this.loginForm.style.display = "none";
+      this.loginFormMessage.innerHTML = "wait...";
+
       this.auth().signOut().then(function (res) {
         console.log(res);
         console.log("logged out");
-      }).catch(function (e) {
-        console.log(e);
+        _this2._onLoginFormExitButtonClick();
+      }, function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log(error, errorCode, errorMessage);
+
         console.log("logout failed");
+        _this2._updateView();
       });
+    }
+  }, {
+    key: "_onLoginFormExitButtonClick",
+    value: function _onLoginFormExitButtonClick() {
+      this.setState({
+        showLoginForm: false
+      });
+      this._updateView();
+    }
+  }, {
+    key: "_updateView",
+    value: function _updateView() {
+      this.updateView(this.state.authenticated);
     }
   }, {
     key: "updateView",
     value: function updateView(authenticated) {
       this.setState({ authenticated: authenticated });
       if (authenticated) {
+        this.operationButton.style.display = "flex";
+        this.loginFormButton.innerHTML = "logout";
         this.loginInput.style.display = "none";
         this.login.style.display = "none";
         this.logout.style.display = "block";
+        this.operationDescription.style.display = "flex";
       } else {
+        this.operationButton.style.display = "none";
+        this.loginFormButton.innerHTML = "login";
         this.loginInput.style.display = "block";
         this.login.style.display = "block";
         this.logout.style.display = "none";
+        this.operationDescription.style.display = "none";
       }
-      this.loginForm.style.display = this.state.showLoginForm ? "block" : "none";
+
+      this.loginForm.style.display = "flex";
+      this.loginFormMessage.innerHTML = "";
+      this.loginModal.style.display = this.state.showLoginForm ? "flex" : "none";
     }
   }]);
 
@@ -338,6 +383,8 @@ var TimerController = function () {
 
     // main container
     this.main = document.getElementById("main");
+    // minute input
+    this.minuteInput = document.getElementById("minuteInput");
 
     // timer indicator
     this.timerIndicator = new TimerIndicator({
@@ -376,7 +423,7 @@ var TimerController = function () {
   }, {
     key: "_onKeydown",
     value: function _onKeydown(e) {
-      var _this = this;
+      var _this3 = this;
 
       // no timer operations if inputting
       if (document.activeElement === this.timerInput.input) {
@@ -388,28 +435,28 @@ var TimerController = function () {
 
       var keydownOperations = {
         " ": function _() {
-          _this._switchTimer();
+          _this3._switchTimer();
         },
         "s": function s() {
-          _this._switchTimer();
+          _this3._switchTimer();
         },
         "Escape": function Escape() {
-          _this._resetTimer(_this.state.startSecond);
+          _this3._resetTimer(_this3.state.startSecond);
         },
         "r": function r() {
-          _this._resetTimer(_this.state.startSecond);
+          _this3._resetTimer(_this3.state.startSecond);
         },
         "ArrowRight": function ArrowRight() {
-          _this._modifySecond(-10);
+          _this3._modifySecond(-10);
         },
         "ArrowLeft": function ArrowLeft() {
-          _this._modifySecond(10);
+          _this3._modifySecond(10);
         },
         "ArrowDown": function ArrowDown() {
-          _this._modifySecond(-1);
+          _this3._modifySecond(-1);
         },
         "ArrowUp": function ArrowUp() {
-          _this._modifySecond(1);
+          _this3._modifySecond(1);
         }
       };
 
@@ -441,6 +488,13 @@ var TimerController = function () {
   }, {
     key: "_updateView",
     value: function _updateView() {
+      var _state = this.state,
+          authenticated = _state.authenticated,
+          startSecond = _state.startSecond;
+
+      if (!authenticated) {
+        this.minuteInput.value = Math.floor(startSecond / 60);
+      }
       this.timerIndicator.updateView(Object.assign(this.state, { main: this.main }));
     }
 
@@ -475,7 +529,7 @@ var TimerController = function () {
   }, {
     key: "_startTimer",
     value: function _startTimer() {
-      var _this2 = this;
+      var _this4 = this;
 
       if (this.state.nowSecond > 0) {
         this.state.isRunning = true;
@@ -484,15 +538,15 @@ var TimerController = function () {
         });
 
         this.state.timerId = setInterval(function () {
-          _this2.state.nowSecond -= 1;
+          _this4.state.nowSecond -= 1;
 
-          if (_this2.state.nowSecond <= 0) {
+          if (_this4.state.nowSecond <= 0) {
             // stop timer
-            _this2.state.nowSecond = 0;
-            _this2._stopTimer();
+            _this4.state.nowSecond = 0;
+            _this4._stopTimer();
           }
 
-          _this2._updateView();
+          _this4._updateView();
         }, 1000);
       }
 
