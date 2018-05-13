@@ -4,18 +4,19 @@
   "description": "timer for lt",
   "main": "index.js",
   "scripts": {
-    "init": "eslint --init",
     "watch": "babel --watch src -d public",
     "build": "babel src -d public",
     "lint": "eslint src",
     "fix": "eslint --fix src",
-    "serve": "npm run build && firebase serve"
+    "serve": "npm run build && browser-sync start --server 'public' --files 'public'"
   },
   "author": "hogashi",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "browser-sync": "^2.24.4",
+    "browsersync": "0.0.1-security",
     "eslint": "^4.19.1"
   }
 }

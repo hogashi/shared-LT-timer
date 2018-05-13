@@ -30,6 +30,7 @@ class Firebase {
     this.db = firebase.database().ref("/data");
     this.auth = firebase.auth;
     this.db.on("value", this._onUpdate.bind(this));
+    this.data = {};
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
     this.operationButton = document.getElementById("buttonContainer");
     this.loginFormButton = document.getElementById("loginFormButton");
@@ -53,24 +54,44 @@ class Firebase {
 
   _onUpdate(snapshot) {
     const val = snapshot.val();
-    console.log(snapshot, val);
-    this.data = val;
+    if (DEBUG) {
+      console.log(snapshot, val);
+    }
+    this.data = Object.assign(this.data, val);
     this.props.onUpdate(val);
   }
 
   _onAuthStateChanged(user) {
-    this.props.onAuthStateChanged(user);
+    if (DEBUG) {
+      console.log("auth changed:");
+      console.log(user);
+    }
+    if (user) {
+      this.setState({
+        authenticated: true,
+      });
+    }
+    else {
+      this.setState({
+        authenticated: false,
+      });
+    }
+    this.props.onAuthStateChanged(this.state.authenticated);
   }
 
   setData(data) {
     this.db.set(Object.assign(this.data, data))
       .then(res => {
-        console.log(res);
-        console.log("db updated");
+        if (DEBUG) {
+          console.log(res);
+          console.log("db updated");
+        }
       })
       .catch(e => {
-        console.log(e);
-        console.log("db update failed");
+        if (DEBUG) {
+          console.log(e);
+          console.log("db update failed");
+        }
       });
   }
 
@@ -91,16 +112,19 @@ class Firebase {
     this.auth().signInWithEmailAndPassword(email, password)
       .then(
         res => {
-          console.log(res);
-          console.log("logged in");
+          if (DEBUG) {
+            console.log(res);
+            console.log("logged in");
+          }
           this._onLoginFormExitButtonClick();
         },
         error => {
           const errorCode    = error.code;
           const errorMessage = error.message;
-          console.log(error, errorCode, errorMessage);
-
-          console.log("login failed");
+          if (DEBUG) {
+            console.log(error, errorCode, errorMessage);
+            console.log("login failed");
+          }
           this._updateView();
         }
       );
@@ -113,16 +137,19 @@ class Firebase {
     this.auth().signOut()
       .then(
         res => {
-          console.log(res);
-          console.log("logged out");
+          if (DEBUG) {
+            console.log(res);
+            console.log("logged out");
+          }
           this._onLoginFormExitButtonClick();
         },
         error => {
           const errorCode    = error.code;
           const errorMessage = error.message;
-          console.log(error, errorCode, errorMessage);
-
-          console.log("logout failed");
+          if (DEBUG) {
+            console.log(error, errorCode, errorMessage);
+            console.log("logout failed");
+          }
           this._updateView();
         }
       );
@@ -171,15 +198,15 @@ class Firebase {
 // propTypes: {
 //     id: string.isRequired,
 //     onDatabaseUpdate: function,
+//     onAuthStateChanged: function,
 //   }
 class TimerIndicator {
   constructor(props) {
     this.props = props;
     this.state = {
-      authenticated: false,
       startSecond: `${10 * 60}`,  // Dentoo.LT Standard
-      second: "0",
-      power: "OFF",
+      second: `${10 * 60}`,
+      // power: "OFF",
     };
 
     this.indicator = document.getElementById(this.props.id);
@@ -199,44 +226,28 @@ class TimerIndicator {
     return `00${num}`.slice(-2);
   }
 
-  _onAuthStateChanged(user) {
-    console.log("auth changed:");
-    console.log(user);
-    if (user) {
-      this.setState({
-        authenticated: true,
-      });
-    }
-    else {
-      this.setState({
-        authenticated: false,
-      });
-    }
-    this.fb.updateView(this.state.authenticated);
+  _onAuthStateChanged(authenticated) {
+    this.props.onAuthStateChanged(authenticated);
+    this.fb.updateView(authenticated);
   }
 
   _onDatabaseUpdate(data) {
-    this.setState(data);
+    // this.setState(data);
     this.props.onDatabaseUpdate(data);
   }
 
   updateView(parentState) {
-    const { isRunning, nowSecond, startSecond, main } = parentState;
-    let second = nowSecond;
-    if (this.state.authenticated) {
-      this.fb.setData({
-        second: `${second}`,
-      });
-    }
-    else {
-      second = parseInt(this.state.second, 10);
-    }
+    const { authenticated, isRunning, nowSecond, startSecond, main } = parentState;
+    this.setState(parentState);
+    let second = parseInt(nowSecond, 10);
     const sec = second % 60;
     const min = Math.floor((second - sec) / 60);
 
     this.indicator.innerHTML = `${this._zfill(min)}:${this._zfill(sec)}`;
 
-    console.log(isRunning, nowSecond, startSecond, main);
+    if (DEBUG) {
+      console.log(isRunning, nowSecond, startSecond, main);
+    }
     if (isRunning) {
       if (second < parseInt(startSecond, 10) * 0.2) {
         main.setAttribute("class", "hurry");
@@ -256,7 +267,7 @@ class TimerIndicator {
       this.indicator.setAttribute("class", "end");
     }
 
-    this.fb.updateView(this.state.authenticated);
+    this.fb.updateView(authenticated);
   }
 }
 
@@ -324,9 +335,10 @@ class TimerInput {
 class TimerController {
   constructor() {
     this.state = {
+      authenticated: false,
       isRunning: false,
-      startSecond: 0,
-      nowSecond: 0,
+      startSecond: `${10 * 60}`,
+      nowSecond: `${10 * 60}`,
       timerId: null
     };
 
@@ -340,6 +352,7 @@ class TimerController {
       new TimerIndicator({
         id: "indicator",
         onDatabaseUpdate: this._onDatabaseUpdate.bind(this),
+        onAuthStateChanged: this._onAuthStateChanged.bind(this),
       });
 
     // time input
@@ -363,6 +376,7 @@ class TimerController {
       });
 
     document.addEventListener("keydown", this._onKeydown.bind(this));
+    this._updateView();
   }
 
   setState(state) {
@@ -404,9 +418,21 @@ class TimerController {
     this.timerInput.onSubmit();
   }
 
+  _onAuthStateChanged(authenticated) {
+    this.setState({ authenticated });
+    this._updateView();
+  }
+
   _onDatabaseUpdate(data) {
+    if (DEBUG) {
+      console.log('authenticated', this.state.authenticated);
+    }
+    if (this.state.authenticated) {
+      return;
+    }
     this.setState({
       isRunning: data.power === "ON",
+      nowSecond: parseInt(data.second, 10),
       startSecond: parseInt(data.startSecond, 10),
     });
     this._updateView();
@@ -414,8 +440,14 @@ class TimerController {
 
   // update the timer view with the state
   _updateView() {
-    const { authenticated, startSecond } = this.state;
-    if (!authenticated) {
+    const { authenticated, nowSecond, startSecond } = this.state;
+    if (authenticated) {
+      this.timerIndicator.fb.setData({
+        second: `${nowSecond}`,
+        startSecond: `${startSecond}`,
+      });
+    }
+    else {
       this.minuteInput.value = Math.floor(startSecond / 60);
     }
     this.timerIndicator.updateView(
@@ -438,20 +470,24 @@ class TimerController {
   _resetTimer(second) {
     this._stopTimer();
 
-    this.state.startSecond = second;
-    this.timerIndicator.fb.setData({
-      startSecond: `${this.state.startSecond}`,
+    this.setState({
+      nowSecond  : second,
+      startSecond: second
     });
-    this.state.nowSecond = this.state.startSecond;
     this._updateView();
   }
 
   _startTimer() {
+    const { authenticated, nowSecond } = this.state;
     if (this.state.nowSecond > 0) {
-      this.state.isRunning = true;
-      this.timerIndicator.fb.setData({
-        power: "ON",
+      this.setState({
+        isRunning: true,
       });
+      if (this.state.authenticated) {
+        this.timerIndicator.fb.setData({
+          power: "ON",
+        });
+      }
 
       this.state.timerId = setInterval(() => {
         this.state.nowSecond -= 1;
@@ -472,10 +508,14 @@ class TimerController {
 
   _stopTimer() {
     clearInterval(this.state.timerId);
-    this.state.isRunning = false;
-    this.timerIndicator.fb.setData({
-      power: "OFF",
+    this.setState({
+      isRunning: false,
     });
+    if (this.state.authenticated) {
+      this.timerIndicator.fb.setData({
+        power: "OFF",
+      });
+    }
 
     this._updateView();
   }
@@ -491,4 +531,5 @@ class TimerController {
   }
 }
 
+let DEBUG = false;
 const lttimer = new TimerController();
