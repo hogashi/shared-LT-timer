@@ -40,6 +40,7 @@ var Firebase = function () {
     this.db.on("value", this._onUpdate.bind(this));
     this.data = {};
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
+    this.minuteInput = document.getElementById("minuteInput");
     this.operationButton = document.getElementById("buttonContainer");
     this.loginFormButton = document.getElementById("loginFormButton");
     this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
@@ -181,6 +182,7 @@ var Firebase = function () {
     value: function updateView(authenticated) {
       this.setState({ authenticated: authenticated });
       if (authenticated) {
+        this.minuteInput.removeAttribute("readonly");
         this.operationButton.style.display = "flex";
         this.loginFormButton.innerHTML = "logout";
         this.loginInput.style.display = "none";
@@ -188,6 +190,7 @@ var Firebase = function () {
         this.logout.style.display = "block";
         this.operationDescription.style.display = "flex";
       } else {
+        this.minuteInput.setAttribute("readonly", true);
         this.operationButton.style.display = "none";
         this.loginFormButton.innerHTML = "login";
         this.loginInput.style.display = "block";
@@ -441,6 +444,9 @@ var TimerController = function () {
     value: function _onKeydown(e) {
       var _this3 = this;
 
+      if (!this.state.authenticated) {
+        return;
+      }
       // no timer operations if inputting
       if (document.activeElement === this.timerInput.input) {
         if (e.key === "Enter") {
@@ -493,6 +499,7 @@ var TimerController = function () {
     key: "_onAuthStateChanged",
     value: function _onAuthStateChanged(authenticated) {
       this.setState({ authenticated: authenticated });
+      this._stopTimer();
       this._updateView();
     }
   }, {
@@ -517,6 +524,7 @@ var TimerController = function () {
   }, {
     key: "_updateView",
     value: function _updateView() {
+      console.log("working...");
       var _state = this.state,
           authenticated = _state.authenticated,
           nowSecond = _state.nowSecond,

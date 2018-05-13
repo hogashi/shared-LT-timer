@@ -32,6 +32,7 @@ class Firebase {
     this.db.on("value", this._onUpdate.bind(this));
     this.data = {};
     this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
+    this.minuteInput = document.getElementById("minuteInput");
     this.operationButton = document.getElementById("buttonContainer");
     this.loginFormButton = document.getElementById("loginFormButton");
     this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
@@ -169,6 +170,7 @@ class Firebase {
   updateView(authenticated) {
     this.setState({ authenticated });
     if (authenticated) {
+      this.minuteInput.removeAttribute("readonly");
       this.operationButton.style.display = "flex";
       this.loginFormButton.innerHTML = "logout";
       this.loginInput.style.display = "none";
@@ -177,6 +179,7 @@ class Firebase {
       this.operationDescription.style.display = "flex";
     }
     else {
+      this.minuteInput.setAttribute("readonly", true);
       this.operationButton.style.display = "none";
       this.loginFormButton.innerHTML = "login";
       this.loginInput.style.display = "block";
@@ -385,6 +388,9 @@ class TimerController {
 
   // args: KeyboardEvent
   _onKeydown(e) {
+    if (!this.state.authenticated) {
+      return;
+    }
     // no timer operations if inputting
     if (document.activeElement === this.timerInput.input) {
       if (e.key === "Enter") {
@@ -420,6 +426,7 @@ class TimerController {
 
   _onAuthStateChanged(authenticated) {
     this.setState({ authenticated });
+    this._stopTimer();
     this._updateView();
   }
 
@@ -440,6 +447,7 @@ class TimerController {
 
   // update the timer view with the state
   _updateView() {
+    console.log("working...");
     const { authenticated, nowSecond, startSecond } = this.state;
     if (authenticated) {
       this.timerIndicator.fb.setData({

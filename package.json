@@ -8,7 +8,8 @@
     "build": "babel src -d public",
     "lint": "eslint src",
     "fix": "eslint --fix src",
-    "serve": "npm run build && browser-sync start --server 'public' --files 'public'"
+    "serve": "npm run build && browser-sync start --server 'public' --files 'public'",
+    "deploy": "npm run build && gh-pages --dist public"
   },
   "author": "hogashi",
   "license": "MIT",
@@ -16,7 +17,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^2.24.4",
-    "browsersync": "0.0.1-security",
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "gh-pages": "^1.1.0"
   }
 }
