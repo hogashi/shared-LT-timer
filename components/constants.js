@@ -1,6 +1,6 @@
 // constants.js
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const POWER_ON = "ON";
 export const POWER_OFF = "OFF";
 export const MESSAGE_WAIT = "wait...";
