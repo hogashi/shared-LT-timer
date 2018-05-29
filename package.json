@@ -4,13 +4,18 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "katatema": "^0.1.8"
+    "classnames": "^2.2.5",
+    "firebase": "^5.0.4",
+    "katatema": "^0.1.8",
+    "prop-types": "^15.6.1"
   },
   "devDependencies": {
-    "gh-pages": "^1.1.0"
+    "gh-pages": "^1.1.0",
+    "prettier": "^1.12.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "prettier init"
   },
   "author": "",
   "license": "ISC"

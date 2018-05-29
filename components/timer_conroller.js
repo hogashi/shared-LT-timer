@@ -1,34 +1,28 @@
+// timer_controller.js
 
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import classNames from "classnames";
 
-// root controller
-export default class TimerController {
-  constructor() {
+import * as LoginForm from "./login_form";
+import * as Constants from '../components/constants';
+
+export default class TimerController extends Component {
+  constructor(props) {
+    super(props);
     this.state = {
       authenticated: false,
-      isRunning: false,
-      startSecond: `${10 * 60}`,
-      nowSecond: `${10 * 60}`,
-      timerId: null
+      isRunning:     false,
+      startSecond:   `${10 * 60}`,
+      nowSecond:     `${10 * 60}`,
+      timerId:       null,
     };
-
-    // main container
-    this.main = document.getElementById("main");
-    // minute input
-    this.minuteInput = document.getElementById("minuteInput");
-
-    // timer indicator
-    this.timerIndicator =
-      new TimerIndicator({
-        id: "indicator",
-        onDatabaseUpdate: this._onDatabaseUpdate.bind(this),
-        onAuthStateChanged: this._onAuthStateChanged.bind(this),
-      });
 
     // time input
     this.timerInput =
       new TimerInput({
         id: "minuteInput",
-        onTimeSubmit: this._resetTimer.bind(this)
+        onMinuteSubmit: this._onMinuteSubmit.bind(this)
       });
 
     // buttons
@@ -43,13 +37,10 @@ export default class TimerController {
         id: "startStopButton",
         onClick: this._switchTimer.bind(this)
       });
-
-    document.addEventListener("keydown", this._onKeydown.bind(this));
-    this._updateView();
   }
 
-  setState(state) {
-    this.state = Object.assign(this.state, state);
+  componentDidMount() {
+    document.addEventListener("keydown", this._onKeydown.bind(this));
   }
 
   // args: KeyboardEvent
@@ -57,33 +48,29 @@ export default class TimerController {
     if (!this.state.authenticated) {
       return;
     }
-    // no timer operations if inputting
-    if (document.activeElement === this.timerInput.input) {
-      if (e.key === "Enter") {
-        this.timerInput.onSubmit();
-      }
-      return;
-    }
 
-    const keydownOperations = {
-      " ":          () => { this._switchTimer(); },
-      "s":          () => { this._switchTimer(); },
-      "Escape":     () => { this._resetTimer(this.state.startSecond); },
-      "r":          () => { this._resetTimer(this.state.startSecond); },
-      "ArrowRight": () => { this._modifySecond(-10); },
-      "ArrowLeft":  () => { this._modifySecond(10); },
-      "ArrowDown":  () => { this._modifySecond(-1); },
-      "ArrowUp":    () => { this._modifySecond(1); },
+    switch (e.key) {
+      case " ":
+      case "s":
+        this._switchTimer();
+        break;
+      case "Escape":
+      case "r":
+        this._resetTimer(this.state.startSecond);
+        break;
+      case "ArrowRight":
+        this._modifySecond(-10);
+        break;
+      case "ArrowLeft":
+        this._modifySecond(10);
+        break;
+      case "ArrowDown":
+        this._modifySecond(-1);
+        break;
+      case "ArrowUp":
+        this._modifySecond(1);
+        break;
     };
-
-    const key = Object.keys(keydownOperations)
-      .filter(k => {
-        return k === e.key;
-      })[0];
-
-    if (key) {
-      keydownOperations[key]();
-    }
   }
 
   _onPressResetButton() {
@@ -97,7 +84,7 @@ export default class TimerController {
   }
 
   _onDatabaseUpdate(data) {
-    if (DEBUG) {
+    if (Constants.DEBUG) {
       console.log('authenticated', this.state.authenticated);
     }
     if (this.state.authenticated) {
@@ -111,22 +98,8 @@ export default class TimerController {
     this._updateView();
   }
 
-  // update the timer view with the state
-  _updateView() {
-    console.log("working...");
-    const { authenticated, nowSecond, startSecond } = this.state;
-    if (authenticated) {
-      this.timerIndicator.fb.setData({
-        second: `${nowSecond}`,
-        startSecond: `${startSecond}`,
-      });
-    }
-    else {
-      this.minuteInput.value = Math.floor(startSecond / 60);
-    }
-    this.timerIndicator.updateView(
-      Object.assign(this.state, { main: this.main })
-    );
+  _onMinuteSubmit(min) {
+    this._resetTimer(min * 60);
   }
 
   // modify the second of the state
@@ -202,5 +175,70 @@ export default class TimerController {
       return;
     }
     this._startTimer();
+  }
+
+  _makeMainClassName() {
+    const { isRunning, startSecond, nowSecond } = this.state;
+    if (isRunning) {
+      return "isRunning";
+    }
+    return "notRunning";
+  }
+
+  _renderIndicator() {
+    const second = parseInt(this.state.nowSecond, 10);
+    const sec = `00${second % 60}`.slice(-2);
+    const min = `00${Math.floor(second / 60)}`.slice(-2);
+
+    return (
+      <div id="indicator" className={second <= 0 ? "end" : null}>
+        {min}:{sec}
+      </div>
+    );
+  }
+
+  _renderOperationDescription() {
+    if (this.state.authenticated) {
+      return (
+        <div id="description">
+          <b>Space/S</b>: start/stop,&nbsp;&nbsp;
+          <b>Escape/R</b>: reset,&nbsp;&nbsp;
+          <b>C-r/F5</b>: init,&nbsp;&nbsp;
+          <b>Arrows</b>: [in/de]crease time
+        </div>
+      );
+    }
+    return null;
+  }
+
+  render() {
+    console.log("working...");
+
+    const { authenticated, isRunning, nowSecond, startSecond } = this.state;
+
+    if (authenticated) {
+      Firebase.setData({
+        second:      `${nowSecond}`,
+        startSecond: `${startSecond}`,
+      });
+    }
+
+    let hurry;
+    if (second < parseInt(startSecond, 10) * 0.2) {
+      hurry = "hurry";
+    }
+
+    return (
+      <main id="main"
+            className={classNames(isRunning ? "on" : "off", hurry)}>
+        <TimerInput onMinuteInput={this._onMinuteInput.bind(this)} />
+        {this._renderIndicator()}
+        <footer>
+          {this._renderOperationDescription()}
+          <LoginContainer />
+        </footer>
+        <Firebase />
+      </main>
+    );
   }
 }
