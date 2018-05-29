@@ -46,13 +46,17 @@ export default class TimerInput extends Component {
   }
 
   _renderButtonContainter() {
-    if (this.props.authenticated) {
+    const { authenticated, onStartStopButtonPressed } = this.props;
+
+    if (authenticated) {
       return (
         <div id="buttonContainer">
-          <button id="resetButton">
+          <button id="resetButton"
+                  onClick={this._onMinuteInput}>
             [re]<br />set
           </button>
-          <button id="startStopButton">
+          <button id="startStopButton"
+                  onClick={this.props.onStartStopButtonPressed}>
             start<br />stop
           </button>
         </div>

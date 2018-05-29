@@ -1,19 +1,12 @@
 // login_container
 
 import React, { Component } from "react";
-import firebase from 'firebase';
+import firebase from "firebase";
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyBqWQysX_EMyRY_g5CnXi6aUCQnIU_SnBY",
-  authDomain:        "shared-lt-timer.firebaseapp.com",
-  databaseURL:       "https://shared-lt-timer.firebaseio.com",
-  projectId:         "shared-lt-timer",
-  storageBucket:     "shared-lt-timer.appspot.com",
-  messagingSenderId: "482122259784"
-};
+import * as Constants from "./constants";
 
-const firebaseApp = firebase.initializeApp(firebaseConfig);
-const firebaseDb  = firebaseApp.database();
+const app = firebase.initializeApp(firebaseConfig);
+const dbRef  = app.database().ref("/data");
 
 // props
 // {
@@ -28,214 +21,221 @@ export default class LoginContainer extends Component {
       showLoginForm: false,
     };
 
-    // app start
-    this.db = firebase.database().ref("/data");
-    this.auth = firebase.auth;
-    this.db.on("value", this._onUpdate.bind(this));
     this.data = {};
-    this.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
-    this.minuteInput = document.getElementById("minuteInput");
-    this.operationButton = document.getElementById("buttonContainer");
-    this.loginFormButton = document.getElementById("loginFormButton");
-    this.loginFormButton.addEventListener("click", this._onLoginFormButtonClick.bind(this));
-    this.loginModal = document.getElementById("loginModal");
-    this.loginForm = document.getElementById("loginForm");
-    this.loginFormMessage = document.getElementById("loginFormMessage");
-    this.loginInput = document.getElementById("loginInput");
-    this.login = document.getElementById("login");
-    this.login.addEventListener("click", this._onLoginClick.bind(this));
-    this.logout = document.getElementById("logout");
-    this.logout.addEventListener("click", this._onLogoutClick.bind(this));
-    this.loginFormExitButton = document.getElementById("loginFormExitButton");
-    this.loginFormExitButton.addEventListener("click", this._onLoginFormExitButtonClick.bind(this));
-    this.operationDescription = document.getElementById("description");
   }
 
-  setState(state) {
-    this.state = Object.assign(this.state, state);
+  componentDidMount() {
+    dbRef.on("value", this._onDbUpdate.bind(this));
+    app.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
   }
 
-  _onUpdate(snapshot) {
+  _isObjectEqual(a, b) {
+    return Object.keys(a).every(key => a[key] === b[key]);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { power, second, startSecond } = nextProps;
+
+    if (this.state.authenticated
+      || this._isObjectEqual({power, second, startSecond}, this.data)) {
+      return;
+    }
+
+    const newData = Object.assign(this.data, {power, second, startSecond});
+    if (Constants.DEBUG) {
+      console.log(newData);
+    }
+    this._setData(newData);
+  }
+
+  // firebase from here
+  // on firebase db updated
+  _onDbUpdate(snapshot) {
     const val = snapshot.val();
-    if (DEBUG) {
+    if (Constants.DEBUG) {
       console.log(snapshot, val);
     }
     this.data = Object.assign(this.data, val);
-    this.props.onUpdate(val);
+    this.props.onDbUpdate(this.data);
   }
 
+  // on firebase auth changed
   _onAuthStateChanged(user) {
-    if (DEBUG) {
+    if (Constants.DEBUG) {
       console.log("auth changed:");
       console.log(user);
     }
-    if (user) {
-      this.setState({
-        authenticated: true,
-      });
-    }
-    else {
-      this.setState({
-        authenticated: false,
-      });
-    }
+    this.setState({
+      authenticated: user ? true : false,
+    });
     this.props.onAuthStateChanged(this.state.authenticated);
   }
 
-  setData(data) {
-    this.db.set(Object.assign(this.data, data))
-      .then(res => {
-        if (DEBUG) {
+  // set data to firebase
+  _setData(newData) {
+    dbRef.set(newData).then(
+      res => {
+        if (Constants.DEBUG) {
           console.log(res);
           console.log("db updated");
         }
-      })
-      .catch(e => {
-        if (DEBUG) {
-          console.log(e);
+      },
+      err => {
+        if (Constants.DEBUG) {
+          console.log(err);
           console.log("db update failed");
         }
-      });
+      }
+    );
   }
 
-  _onLoginFormButtonClick() {
+  // login container from here
+  _onModalShowButtonClick() {
     this.setState({
-      showLoginForm: !this.state.showLoginForm,
+      showLoginForm: true,
     });
-    this._updateView();
   }
 
   _onLoginClick() {
     const email    = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    this.loginForm.style.display = "none";
-    this.loginFormMessage.innerHTML = "wait...";
+    this.setState({
+      showLoginForm: false,
+      isProsessing: true,
+    });
 
-    this.auth().signInWithEmailAndPassword(email, password)
-      .then(
-        res => {
-          if (DEBUG) {
-            console.log(res);
-            console.log("logged in");
-          }
-          this._onLoginFormExitButtonClick();
-        },
-        error => {
-          const errorCode    = error.code;
-          const errorMessage = error.message;
-          if (DEBUG) {
-            console.log(error, errorCode, errorMessage);
-            console.log("login failed");
-          }
-          this._updateView();
+    app.auth().signInWithEmailAndPassword(email, password).then(
+      res => {
+        if (Constants.DEBUG) {
+          console.log(res);
+          console.log("logged in");
         }
-      );
+        this._onFormExitButtonClick();
+      },
+      error => {
+        const errorCode    = error.code;
+        const errorMessage = error.message;
+        if (Constants.DEBUG) {
+          console.log(error, errorCode, errorMessage);
+          console.log("login failed");
+        }
+      }
+    ).finally(() => {
+      this.setState({
+        isProsessing: false,
+      });
+    });
   }
 
   _onLogoutClick() {
-    this.loginForm.style.display = "none";
-    this.loginFormMessage.innerHTML = "wait...";
+    this.setState({
+      isProsessing: true,
+    });
 
-    this.auth().signOut()
-      .then(
-        res => {
-          if (DEBUG) {
-            console.log(res);
-            console.log("logged out");
-          }
-          this._onLoginFormExitButtonClick();
-        },
-        error => {
-          const errorCode    = error.code;
-          const errorMessage = error.message;
-          if (DEBUG) {
-            console.log(error, errorCode, errorMessage);
-            console.log("logout failed");
-          }
-          this._updateView();
+    app.auth().signOut().then(
+      res => {
+        if (Constants.DEBUG) {
+          console.log(res);
+          console.log("logged out");
         }
-      );
+        this._onFormExitButtonClick();
+      },
+      error => {
+        const errorCode    = error.code;
+        const errorMessage = error.message;
+        if (Constants.DEBUG) {
+          console.log(error, errorCode, errorMessage);
+          console.log("logout failed");
+        }
+      }
+    ).finally(() => {
+      this.setState({
+        isProsessing: false,
+      });
+    });
   }
 
-  _onLoginFormExitButtonClick() {
+  _onFormExitButtonClick() {
     this.setState({
       showLoginForm: false,
     });
-    this._updateView();
   }
 
-  _updateView() {
-    this.updateView(this.state.authenticated);
+  _loginLogoutText() {
+    return this.state.authenticated ? "logout" : "login";
   }
 
-  updateView(authenticated) {
-    this.setState({ authenticated });
-    if (authenticated) {
-      this.minuteInput.removeAttribute("readonly");
-      this.operationButton.style.display = "flex";
-      this.loginFormButton.innerHTML = "logout";
-      this.loginInput.style.display = "none";
-      this.login.style.display = "none";
-      this.logout.style.display = "block";
-      this.operationDescription.style.display = "flex";
+  _renderFormMessage() {
+    let message = "login/logout";
+    if (propsessFailed) {
+      message = Constants.MESSAGE_FAIL;
     }
-    else {
-      this.minuteInput.setAttribute("readonly", true);
-      this.operationButton.style.display = "none";
-      this.loginFormButton.innerHTML = "login";
-      this.loginInput.style.display = "block";
-      this.login.style.display = "block";
-      this.logout.style.display = "none";
-      this.operationDescription.style.display = "none";
+    else if (isProsessing) {
+      message = Constants.MESSAGE_WAIT;
+    }
+    return (
+      <div id="loginFormMessage">
+        {message}
+      </div>
+    );
+  }
+
+  _renderForm() {
+    if (!this.state.showLoginForm) {
+      return null;
     }
 
-    this.loginForm.style.display = "flex";
-    this.loginFormMessage.innerHTML = "";
-    this.loginModal.style.display = this.state.showLoginForm ? "flex" : "none";
+    let onButtonClick = this._onLoginClick.bind(this);
+    let loginInput;
 
-    const styles = {
-      buttonContainer: {
-        display: authenticated ? "flex" : "none",
-      },
-      loginFormButton: {
-        display: authenticated ? "block" : "none",
-      },
-      loginInput: {
-        display: authenticated ? "block" : "none",
-      },
-      loginButton: {
-        display: authenticated ? "block" : "none",
-      },
-      logoutButton: {
-        display: !authenticated ? "block" : "none",
-      },
-      operationDescription: {
-        display: authenticated ? "flex" : "none",
-      },
-    };
+    if (!this.state.authenticated) {
+      onButtonClick = this._onLogoutClick.bind(this);
+      loginInput = (
+        <div id="loginInput" key="loginInput">
+          <div>
+            <input id="email"
+                    type="text"
+                    placeholder="email address" />
+          </div>
+          <div>
+            <input id="password"
+                    type="password"
+                    placeholder="password" />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div id="loginForm">
+        {loginInput}
+        <button id="loginLogoutButton"
+                key="loginLogoutButton"
+                onClick={onButtonClick}>
+          {this._loginLogoutText()}
+        </button>
+      </div>
+    );
+  }
+
+  render() {
+    const { message, showLoginForm, isProsessing } = this.state;
 
     return (
       <div id="loginContainer">
-        <button id="loginFormButton" style={styles.loginFormButton}>
-          {authenticated ? "logout" : "login"}
+        <button id="loginModalShowButton"
+                onClick={this._onModalShowButtonClick.bind(this)}>
+          {this._loginLogoutText()}
         </button>
         <div id="loginModal">
           <div id="loginFormContainer">
-            <div id="loginFormMessage"></div>
-            <div id="loginForm" style={styles.loginForm}>
-              <div id="loginInput" style={styles.loginInput}>
-                <div><input id="email" type="text" placeholder="email address"></div>
-                <div><input id="password" type="password" placeholder="password"></div>
-              </div>
-              <button id="login" style={styles.loginButton}>
-                login
-              </button>
-              <button id="logout" style={styles.logoutButton}>
-                logout
-              </button>
-            </div>
-            <button id="loginFormExitButton">back</button>
+            {this._renderFormMessage()}
+            {this._renderForm()}
+            <button id="loginFormExitButton"
+                    onClick={this._onFormExitButtonClick.bind(this)}>
+              back
+            </button>
           </div>
         </div>
       </div>
