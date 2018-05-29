@@ -1,4 +1,16 @@
-node_modules
+# git files
+.git
+
+# latex
+*.aux
+*.dvi
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# vim swap file
 *.swp
-*.log
+
+# node
+node_modules
 
