@@ -8,7 +8,7 @@ import "firebase/database";
 import * as Constants from "./constants";
 
 const app = firebase.initializeApp(Constants.firebaseConfig);
-const dbRef  = app.database().ref("/data");
+const dbRef = app.database().ref("/data");
 
 // props
 // {
@@ -19,11 +19,11 @@ export default class LoginContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      authenticated:  false,
-      showLoginForm:  true,
+      authenticated: false,
+      showLoginForm: true,
       showLoginModal: false,
-      isProsessing:   false,
-      prosessFailed:  false,
+      isProsessing: false,
+      prosessFailed: false
     };
 
     this.data = {};
@@ -45,12 +45,14 @@ export default class LoginContainer extends Component {
       console.log("nprops", nextProps);
     }
 
-    if (!this.state.authenticated
-      || this._isObjectEqual({power, second, startSecond}, this.data)) {
+    if (
+      !this.state.authenticated ||
+      this._isObjectEqual({ power, second, startSecond }, this.data)
+    ) {
       return;
     }
 
-    const newData = Object.assign(this.data, {power, second, startSecond});
+    const newData = Object.assign(this.data, { power, second, startSecond });
     if (Constants.DEBUG) {
       console.log(newData);
     }
@@ -75,7 +77,7 @@ export default class LoginContainer extends Component {
       console.log(user);
     }
     this.setState({
-      authenticated: user ? true : false,
+      authenticated: user ? true : false
     });
     this.props.onAuthStateChanged(this.state.authenticated);
   }
@@ -101,88 +103,96 @@ export default class LoginContainer extends Component {
   // login container from here
   _onModalShowButtonClick() {
     this.setState({
-      showLoginModal: true,
+      showLoginModal: true
     });
   }
 
   _onLoginClick() {
-    const email    = document.getElementById("email").value;
+    const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
     this.setState({
       showLoginForm: false,
-      isProsessing: true,
+      isProsessing: true
     });
 
-    app.auth().signInWithEmailAndPassword(email, password).then(
-      res => {
-        if (Constants.DEBUG) {
-          console.log(res);
-          console.log("logged in");
+    app
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(
+        res => {
+          if (Constants.DEBUG) {
+            console.log(res);
+            console.log("logged in");
+          }
+          this.setState({
+            prosessFailed: false
+          });
+          this._onFormExitButtonClick();
+        },
+        error => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          if (Constants.DEBUG) {
+            console.log(error, errorCode, errorMessage);
+            console.log("login failed");
+          }
+          this.setState({
+            prosessFailed: true
+          });
         }
+      )
+      .finally(() => {
         this.setState({
-          prosessFailed: false,
+          showLoginForm: true,
+          isProsessing: false
         });
-        this._onFormExitButtonClick();
-      },
-      error => {
-        const errorCode    = error.code;
-        const errorMessage = error.message;
-        if (Constants.DEBUG) {
-          console.log(error, errorCode, errorMessage);
-          console.log("login failed");
-        }
-        this.setState({
-          prosessFailed: true,
-        });
-      }
-    ).finally(() => {
-      this.setState({
-        showLoginForm: true,
-        isProsessing: false,
       });
-    });
   }
 
   _onLogoutClick() {
     this.setState({
-      isProsessing: true,
+      isProsessing: true
     });
 
-    app.auth().signOut().then(
-      res => {
-        if (Constants.DEBUG) {
-          console.log(res);
-          console.log("logged out");
+    app
+      .auth()
+      .signOut()
+      .then(
+        res => {
+          if (Constants.DEBUG) {
+            console.log(res);
+            console.log("logged out");
+          }
+          this.setState({
+            prosessFailed: false
+          });
+          this._onFormExitButtonClick();
+        },
+        error => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          if (Constants.DEBUG) {
+            console.log(error, errorCode, errorMessage);
+            console.log("logout failed");
+          }
+          this.setState({
+            prosessFailed: true
+          });
         }
+      )
+      .finally(() => {
         this.setState({
-          prosessFailed: false,
+          showLoginForm: true,
+          isProsessing: false
         });
-        this._onFormExitButtonClick();
-      },
-      error => {
-        const errorCode    = error.code;
-        const errorMessage = error.message;
-        if (Constants.DEBUG) {
-          console.log(error, errorCode, errorMessage);
-          console.log("logout failed");
-        }
-        this.setState({
-          prosessFailed: true,
-        });
-      }
-    ).finally(() => {
-      this.setState({
-        showLoginForm: true,
-        isProsessing: false,
       });
-    });
   }
 
   _onFormExitButtonClick() {
     this.setState({
       showLoginModal: false,
-      prosessFailed:  false,
+      prosessFailed: false
     });
   }
 
@@ -197,8 +207,10 @@ export default class LoginContainer extends Component {
           <div id="loginFormContainer">
             {this._renderFormMessage()}
             {this._renderForm()}
-            <button id="loginFormExitButton"
-                    onClick={this._onFormExitButtonClick.bind(this)}>
+            <button
+              id="loginFormExitButton"
+              onClick={this._onFormExitButtonClick.bind(this)}
+            >
               back
             </button>
           </div>
@@ -214,15 +226,10 @@ export default class LoginContainer extends Component {
     let message = "login/logout";
     if (prosessFailed) {
       message = Constants.MESSAGE_FAIL;
-    }
-    else if (isProsessing) {
+    } else if (isProsessing) {
       message = Constants.MESSAGE_WAIT;
     }
-    return (
-      <div id="loginFormMessage">
-        {message}
-      </div>
-    );
+    return <div id="loginFormMessage">{message}</div>;
   }
 
   _renderForm() {
@@ -238,14 +245,10 @@ export default class LoginContainer extends Component {
       loginInput = (
         <div id="loginInput" key="loginInput">
           <div>
-            <input id="email"
-                    type="text"
-                    placeholder="email address" />
+            <input id="email" type="text" placeholder="email address" />
           </div>
           <div>
-            <input id="password"
-                    type="password"
-                    placeholder="password" />
+            <input id="password" type="password" placeholder="password" />
           </div>
         </div>
       );
@@ -254,9 +257,11 @@ export default class LoginContainer extends Component {
     return (
       <div id="loginForm">
         {loginInput}
-        <button id="loginLogoutButton"
-                key="loginLogoutButton"
-                onClick={onButtonClick}>
+        <button
+          id="loginLogoutButton"
+          key="loginLogoutButton"
+          onClick={onButtonClick}
+        >
           {this._loginLogoutText()}
         </button>
       </div>
@@ -268,8 +273,10 @@ export default class LoginContainer extends Component {
 
     return (
       <div id="loginContainer">
-        <button id="loginModalShowButton"
-                onClick={this._onModalShowButtonClick.bind(this)}>
+        <button
+          id="loginModalShowButton"
+          onClick={this._onModalShowButtonClick.bind(this)}
+        >
           {this._loginLogoutText()}
         </button>
         {this._renderModal()}

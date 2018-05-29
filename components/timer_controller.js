@@ -6,17 +6,17 @@ import classNames from "classnames";
 
 import TimerInput from "./timer_input";
 import LoginContainer from "./login_container";
-import * as Constants from './constants';
+import * as Constants from "./constants";
 
 export default class TimerController extends Component {
   constructor(props) {
     super(props);
     this.state = {
       authenticated: false,
-      isRunning:     false,
-      startSecond:   10 * 60,
-      nowSecond:     10 * 60,
-      timerId:       null,
+      isRunning: false,
+      startSecond: 10 * 60,
+      nowSecond: 10 * 60,
+      timerId: null
     };
   }
 
@@ -26,7 +26,10 @@ export default class TimerController extends Component {
 
   // args: KeyboardEvent
   _onKeydown(e) {
-    if (!this.state.authenticated || e.target.getAttribute("id") === "minuteInput") {
+    if (
+      !this.state.authenticated ||
+      e.target.getAttribute("id") === "minuteInput"
+    ) {
       return;
     }
 
@@ -51,7 +54,7 @@ export default class TimerController extends Component {
       case "ArrowUp":
         this._modifySecond(1);
         break;
-    };
+    }
   }
 
   _onAuthStateChanged(authenticated) {
@@ -61,7 +64,7 @@ export default class TimerController extends Component {
 
   _onDbUpdate(data) {
     if (Constants.DEBUG) {
-      console.log('authenticated', this.state.authenticated);
+      console.log("authenticated", this.state.authenticated);
     }
     if (this.state.authenticated) {
       return;
@@ -69,7 +72,7 @@ export default class TimerController extends Component {
     this.setState({
       isRunning: data.power === Constants.POWER_ON,
       nowSecond: parseInt(data.second, 10),
-      startSecond: parseInt(data.startSecond, 10),
+      startSecond: parseInt(data.startSecond, 10)
     });
   }
 
@@ -94,7 +97,7 @@ export default class TimerController extends Component {
     this._stopTimer();
 
     this.setState({
-      nowSecond  : second,
+      nowSecond: second,
       startSecond: second
     });
   }
@@ -103,12 +106,12 @@ export default class TimerController extends Component {
     const { nowSecond } = this.state;
 
     this.setState({
-      nowSecond: nowSecond - 1,
+      nowSecond: nowSecond - 1
     });
     if (nowSecond - 1 <= 0) {
       // stop timer
       this.setState({
-        nowSecond: 0,
+        nowSecond: 0
       });
       this._stopTimer();
       return;
@@ -119,13 +122,13 @@ export default class TimerController extends Component {
     const { authenticated, nowSecond } = this.state;
     if (nowSecond > 0) {
       this.setState({
-        isRunning: true,
+        isRunning: true
       });
 
       const timerId = setInterval(this._reduceSecond.bind(this), 1000);
 
       this.setState({
-        timerId: timerId,
+        timerId: timerId
       });
     }
   }
@@ -135,7 +138,7 @@ export default class TimerController extends Component {
 
     clearInterval(timerId);
     this.setState({
-      isRunning: false,
+      isRunning: false
     });
   }
 
@@ -186,9 +189,9 @@ export default class TimerController extends Component {
     const { authenticated, isRunning, nowSecond, startSecond } = this.state;
 
     const newData = {
-      power:       isRunning ? Constants.POWER_ON : Constants.POWER_OFF,
-      second:      `${nowSecond}`,
-      startSecond: `${startSecond}`,
+      power: isRunning ? Constants.POWER_ON : Constants.POWER_OFF,
+      second: `${nowSecond}`,
+      startSecond: `${startSecond}`
     };
 
     let hurry;
@@ -197,17 +200,20 @@ export default class TimerController extends Component {
     }
 
     return (
-      <main id="main"
-            className={classNames(isRunning ? "on" : "off", hurry)}>
-        <TimerInput authenticated={authenticated}
-                    onMinuteSubmit={this._onMinuteSubmit.bind(this)}
-                    onStartStopButtonPressed={this._switchTimer.bind(this)} />
+      <main id="main" className={classNames(isRunning ? "on" : "off", hurry)}>
+        <TimerInput
+          authenticated={authenticated}
+          onMinuteSubmit={this._onMinuteSubmit.bind(this)}
+          onStartStopButtonPressed={this._switchTimer.bind(this)}
+        />
         {this._renderIndicator()}
         <footer>
           {this._renderOperationDescription()}
-          <LoginContainer {...newData}
-                          onDbUpdate={this._onDbUpdate.bind(this)}
-                          onAuthStateChanged={this._onAuthStateChanged.bind(this)} />
+          <LoginContainer
+            {...newData}
+            onDbUpdate={this._onDbUpdate.bind(this)}
+            onAuthStateChanged={this._onAuthStateChanged.bind(this)}
+          />
         </footer>
       </main>
     );

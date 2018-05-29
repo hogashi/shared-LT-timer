@@ -9,7 +9,7 @@ export default class TimerInput extends Component {
 
     this.state = {
       inputState: "",
-      minute:     "10",
+      minute: "10"
     };
   }
 
@@ -21,7 +21,7 @@ export default class TimerInput extends Component {
     const startSecond = nextProps.startSecond;
     if (!nextProps.authenticated) {
       this.setState({
-        minute: `${Math.floor(startSecond ? startSecond / 60 : 10)}`,
+        minute: `${Math.floor(startSecond ? startSecond / 60 : 10)}`
       });
     }
   }
@@ -29,7 +29,7 @@ export default class TimerInput extends Component {
   _onChange(e) {
     console.log(e, e.target, e.target.value);
     this.setState({
-      minute: e.target.value,
+      minute: e.target.value
     });
   }
 
@@ -54,15 +54,14 @@ export default class TimerInput extends Component {
     const minute = parseInt(this.state.minute);
     if (this._isValidMinute(minute)) {
       this.setState({
-        inputState: "valid",
+        inputState: "valid"
       });
       this.inputRef.blur();
 
       this.props.onMinuteSubmit(minute);
-    }
-    else {
+    } else {
       this.setState({
-        inputState: "invalid",
+        inputState: "invalid"
       });
       this.inputRef.focus();
     }
@@ -74,12 +73,13 @@ export default class TimerInput extends Component {
     if (authenticated) {
       return (
         <div id="buttonContainer">
-          <button id="resetButton"
-                  onClick={this._onMinuteSubmit.bind(this)}>
+          <button id="resetButton" onClick={this._onMinuteSubmit.bind(this)}>
             [re]<br />set
           </button>
-          <button id="startStopButton"
-                  onClick={this.props.onStartStopButtonPressed.bind(this)}>
+          <button
+            id="startStopButton"
+            onClick={this.props.onStartStopButtonPressed.bind(this)}
+          >
             start<br />stop
           </button>
         </div>
@@ -95,15 +95,17 @@ export default class TimerInput extends Component {
     return (
       <div id="interaction">
         minute(s):
-        <input id="minuteInput"
-               ref={ref => this.inputRef = ref}
-               className={inputState}
-               type="text"
-               placeholder="1~99"
-               readOnly={!authenticated}
-               value={minute}
-               onChange={this._onChange.bind(this)}
-               onKeyDown={this._onKeyDown.bind(this)} />
+        <input
+          id="minuteInput"
+          ref={ref => (this.inputRef = ref)}
+          className={inputState}
+          type="text"
+          placeholder="1~99"
+          readOnly={!authenticated}
+          value={minute}
+          onChange={this._onChange.bind(this)}
+          onKeyDown={this._onKeyDown.bind(this)}
+        />
         {this._renderButtonContainter()}
       </div>
     );
