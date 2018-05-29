@@ -1,11 +1,13 @@
 // login_container
 
 import React, { Component } from "react";
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
 
 import * as Constants from "./constants";
 
-const app = firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(Constants.firebaseConfig);
 const dbRef  = app.database().ref("/data");
 
 // props
@@ -17,8 +19,11 @@ export default class LoginContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      authenticated: false,
-      showLoginForm: false,
+      authenticated:  false,
+      showLoginForm:  true,
+      showLoginModal: false,
+      isProsessing:   false,
+      prosessFailed:  false,
     };
 
     this.data = {};
@@ -92,7 +97,7 @@ export default class LoginContainer extends Component {
   // login container from here
   _onModalShowButtonClick() {
     this.setState({
-      showLoginForm: true,
+      showLoginModal: true,
     });
   }
 
@@ -111,6 +116,9 @@ export default class LoginContainer extends Component {
           console.log(res);
           console.log("logged in");
         }
+        this.setState({
+          prosessFailed: false,
+        });
         this._onFormExitButtonClick();
       },
       error => {
@@ -120,6 +128,9 @@ export default class LoginContainer extends Component {
           console.log(error, errorCode, errorMessage);
           console.log("login failed");
         }
+        this.setState({
+          prosessFailed: true,
+        });
       }
     ).finally(() => {
       this.setState({
@@ -139,6 +150,9 @@ export default class LoginContainer extends Component {
           console.log(res);
           console.log("logged out");
         }
+        this.setState({
+          prosessFailed: false,
+        });
         this._onFormExitButtonClick();
       },
       error => {
@@ -148,6 +162,9 @@ export default class LoginContainer extends Component {
           console.log(error, errorCode, errorMessage);
           console.log("logout failed");
         }
+        this.setState({
+          prosessFailed: true,
+        });
       }
     ).finally(() => {
       this.setState({
@@ -158,7 +175,8 @@ export default class LoginContainer extends Component {
 
   _onFormExitButtonClick() {
     this.setState({
-      showLoginForm: false,
+      showLoginModal: false,
+      prosessFailed:  false,
     });
   }
 
@@ -166,9 +184,29 @@ export default class LoginContainer extends Component {
     return this.state.authenticated ? "logout" : "login";
   }
 
+  _renderModal() {
+    if (this.state.showLoginModal) {
+      return (
+        <div id="loginModal">
+          <div id="loginFormContainer">
+            {this._renderFormMessage()}
+            {this._renderForm()}
+            <button id="loginFormExitButton"
+                    onClick={this._onFormExitButtonClick.bind(this)}>
+              back
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
+
   _renderFormMessage() {
+    const { prosessFailed, isProsessing } = this.state;
+
     let message = "login/logout";
-    if (propsessFailed) {
+    if (prosessFailed) {
       message = Constants.MESSAGE_FAIL;
     }
     else if (isProsessing) {
@@ -186,11 +224,11 @@ export default class LoginContainer extends Component {
       return null;
     }
 
-    let onButtonClick = this._onLoginClick.bind(this);
+    let onButtonClick = this._onLogoutClick.bind(this);
     let loginInput;
 
     if (!this.state.authenticated) {
-      onButtonClick = this._onLogoutClick.bind(this);
+      onButtonClick = this._onLoginClick.bind(this);
       loginInput = (
         <div id="loginInput" key="loginInput">
           <div>
@@ -228,16 +266,7 @@ export default class LoginContainer extends Component {
                 onClick={this._onModalShowButtonClick.bind(this)}>
           {this._loginLogoutText()}
         </button>
-        <div id="loginModal">
-          <div id="loginFormContainer">
-            {this._renderFormMessage()}
-            {this._renderForm()}
-            <button id="loginFormExitButton"
-                    onClick={this._onFormExitButtonClick.bind(this)}>
-              back
-            </button>
-          </div>
-        </div>
+        {this._renderModal()}
       </div>
     );
   }

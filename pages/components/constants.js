@@ -13,4 +13,3 @@ export const firebaseConfig = {
   storageBucket:     "shared-lt-timer.appspot.com",
   messagingSenderId: "482122259784"
 };
-  

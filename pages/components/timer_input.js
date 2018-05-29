@@ -4,11 +4,30 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 export default class TimerInput extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      inputState: "",
+      minute:     "10",
+    };
+  }
+
   componentDidMount() {
     this.inputRef.focus();
   }
 
+  componentWillReceiveProps(nextProps) {
+    const startSecond = nextProps.startSecond;
+    if (!nextProps.authenticated) {
+      this.setState({
+        minute: `${Math.floor(startSecond ? startSecond / 60 : 10)}`,
+      });
+    }
+  }
+
   _onChange(e) {
+    console.log(e, e.target, e.target.value);
     this.setState({
       minute: e.target.value,
     });
@@ -17,7 +36,7 @@ export default class TimerInput extends Component {
   _onKeyDown(e) {
     if (e.key === "Enter") {
       e.stopPropagation();
-      this._onMinuteInput();
+      this._onMinuteSubmit();
     }
   }
 
@@ -27,11 +46,11 @@ export default class TimerInput extends Component {
     return 1 <= min && min <= 99;
   }
 
-  _onMinuteInput() {
+  _onMinuteSubmit() {
     const minute = parseInt(this.state.minute);
     if (this._isValidMinute(minute)) {
       this.setState({
-        inputClassName: "valid",
+        inputState: "valid",
       });
       this.inputRef.blur();
 
@@ -39,7 +58,7 @@ export default class TimerInput extends Component {
     }
     else {
       this.setState({
-        inputClassName: "invalid",
+        inputState: "invalid",
       });
       this.inputRef.focus();
     }
@@ -52,7 +71,7 @@ export default class TimerInput extends Component {
       return (
         <div id="buttonContainer">
           <button id="resetButton"
-                  onClick={this._onMinuteInput}>
+                  onClick={this._onMinuteSubmit}>
             [re]<br />set
           </button>
           <button id="startStopButton"
@@ -67,26 +86,20 @@ export default class TimerInput extends Component {
 
   render() {
     const { authenticated, startSecond } = this.props;
-    const { inputClassName, minute } = this.state;
-
-    if (!authenticated) {
-      this.setState({
-        minute: authenticated ? `${Math.floor(startSecond / 60)}` : null,
-      });
-    }
+    const { inputState, minute } = this.state;
 
     return (
       <div id="interaction">
         minute(s):
         <input id="minuteInput"
                ref={ref => this.inputRef = ref}
-               className={inputClassName}
+               className={inputState}
                type="text"
                placeholder="1~99"
                readOnly={!authenticated}
                value={minute}
-               onChange={this._onChange}
-               onKeyDown={this._onKeyDown} />
+               onChange={this._onChange.bind(this)}
+               onKeyDown={this._onKeyDown.bind(this)} />
         {this._renderButtonContainter()}
       </div>
     );

@@ -4,7 +4,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 
-import * as LoginForm from "./login_form";
+import TimerInput from "./timer_input";
+import LoginContainer from "./login_container";
 import * as Constants from './constants';
 
 export default class TimerController extends Component {
@@ -17,20 +18,6 @@ export default class TimerController extends Component {
       nowSecond:     10 * 60,
       timerId:       null,
     };
-
-    // time input
-    this.timerInput =
-      new TimerInput({
-        id: "minuteInput",
-        onMinuteSubmit: this._onMinuteSubmit.bind(this)
-      });
-
-    // buttons
-    this.resetButton =
-      new Button({
-        id: "resetButton",
-        onClick: this._onResetButtonPressed.bind(this)
-      });
   }
 
   componentDidMount() {
@@ -110,6 +97,22 @@ export default class TimerController extends Component {
     });
   }
 
+  _reduceSecond() {
+    const { nowSecond } = this.state;
+
+    if (nowSecond <= 0) {
+      // stop timer
+      this.setState({
+        nowSecond: 0,
+      });
+      this._stopTimer();
+      return;
+    }
+    this.setState({
+      nowSecond: nowSecond - 1,
+    });
+  }
+
   _startTimer() {
     const { authenticated, nowSecond } = this.state;
     if (nowSecond > 0) {
@@ -117,20 +120,10 @@ export default class TimerController extends Component {
         isRunning: true,
       });
 
+      const timerId = setInterval(this._reduceSecond.bind(this), 1000);
+
       this.setState({
-        timerId: setInterval(() => {
-          if (nowSecond <= 0) {
-            // stop timer
-            this.setState({
-              nowSecond: 0,
-            });
-            this._stopTimer();
-            return;
-          }
-          this.setState({
-            nowSecond: nowSecond - 1,
-          });
-        }, 1000),
+        timerId: timerId,
       });
     }
   }
@@ -197,14 +190,15 @@ export default class TimerController extends Component {
     };
 
     let hurry;
-    if (second < parseInt(startSecond, 10) * 0.2) {
+    if (nowSecond < parseInt(startSecond, 10) * 0.2) {
       hurry = "hurry";
     }
 
     return (
       <main id="main"
             className={classNames(isRunning ? "on" : "off", hurry)}>
-        <TimerInput onMinuteInput={this._onMinuteInput.bind(this)} />
+        <TimerInput authenticated={authenticated}
+                    onMinuteSubmit={this._onMinuteSubmit.bind(this)} />
         {this._renderIndicator()}
         <footer>
           {this._renderOperationDescription()}
