@@ -41,7 +41,9 @@ export default class LoginContainer extends Component {
   componentWillReceiveProps(nextProps) {
     const { power, second, startSecond } = nextProps;
 
-    console.log("nprops", nextProps);
+    if (Constants.DEBUG) {
+      console.log("nprops", nextProps);
+    }
 
     if (!this.state.authenticated
       || this._isObjectEqual({power, second, startSecond}, this.data)) {
