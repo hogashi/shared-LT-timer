@@ -1,9 +1,11 @@
+/* index.scss */
+
 * {
   margin: 0;
   padding: 0;
   font-family: Consolas, sans-serif;
 }
-html, body {
+html, body, #container, #root {
   width: 100%;
   height: 100%;
 }
@@ -17,11 +19,12 @@ html, body {
   align-items: center;
   box-sizing: border-box;
 }
-.isRunning {
+.on {
   background-color: #dfe;
-}
-.hurry {
-  background-color: #fbb;
+
+  &.hurry {
+    background-color: #fbb;
+  }
 }
 #interaction {
   display: flex;
@@ -49,7 +52,7 @@ html, body {
 }
 #buttonContainer {
   flex: 0 1 auto;
-  display: none;
+  display: flex;
 }
 button {
   display: block;
@@ -87,14 +90,14 @@ footer {
 #loginContainer {
   flex: 0 1 auto;
 }
-#loginFormButton {
+#loginModalShowButton {
   width: auto;
   height: auto;
   padding: 7px 10px;
   background: rgba(255, 255, 255, 1);
 }
 #loginModal {
-  display: none;
+  display: flex;
   justify-content: center;
   align-items: center;
   position: fixed;

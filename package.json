@@ -1,23 +1,25 @@
 {
-  "name": "lttimer",
+  "name": "lttimer-katatema",
   "version": "1.0.0",
-  "description": "timer for lt",
+  "description": "",
   "main": "index.js",
-  "scripts": {
-    "watch": "babel --watch src -d public",
-    "build": "babel src -d public",
-    "lint": "eslint src",
-    "fix": "eslint --fix src",
-    "serve": "npm run build && browser-sync start --server 'public' --files 'public'",
-    "deploy": "npm run build && gh-pages --dist public"
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "firebase": "^5.0.4",
+    "katatema": "^0.1.8",
+    "prop-types": "^15.6.1"
   },
-  "author": "hogashi",
-  "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "browser-sync": "^2.24.4",
-    "eslint": "^4.19.1",
-    "gh-pages": "^1.1.0"
-  }
+    "gh-pages": "^1.1.0",
+    "prettier": "^1.12.1"
+  },
+  "scripts": {
+    "deploy": "gh-pages --dist docs",
+    "build": "katatema build",
+    "serve": "katatema serve",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "prettier pages/*.js components/*.{js,scss}"
+  },
+  "author": "",
+  "license": "ISC"
 }
