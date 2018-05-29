@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import Head from "katatema/head";
 
 import Style from "./index.scss";
-import TimerController from '../components/timer_controller';
-import * as Constants from '../components/constants';
+import TimerController from './components/timer_controller';
+import * as Constants from './components/constants';
 
 export default () => (
   <div id="root">

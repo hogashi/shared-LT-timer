@@ -15,7 +15,7 @@ const dbRef  = app.database().ref("/data");
 // }
 export default class LoginContainer extends Component {
   constructor(props) {
-    this.props = props;
+    super(props);
     this.state = {
       authenticated: false,
       showLoginForm: false,

@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 
 import * as LoginForm from "./login_form";
-import * as Constants from '../components/constants';
+import * as Constants from './constants';
 
 export default class TimerController extends Component {
   constructor(props) {
