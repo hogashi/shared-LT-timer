@@ -1,4 +1,4 @@
-// login_container
+// login_container.js
 
 import React, { Component } from "react";
 import firebase from "firebase/app";
@@ -30,8 +30,8 @@ export default class LoginContainer extends Component {
   }
 
   componentDidMount() {
-    dbRef.on("value", this._onDbUpdate.bind(this));
     app.auth().onAuthStateChanged(this._onAuthStateChanged.bind(this));
+    dbRef.on("value", this._onDbUpdate.bind(this));
   }
 
   _isObjectEqual(a, b) {
@@ -41,7 +41,9 @@ export default class LoginContainer extends Component {
   componentWillReceiveProps(nextProps) {
     const { power, second, startSecond } = nextProps;
 
-    if (this.state.authenticated
+    console.log("nprops", nextProps);
+
+    if (!this.state.authenticated
       || this._isObjectEqual({power, second, startSecond}, this.data)) {
       return;
     }
@@ -134,6 +136,7 @@ export default class LoginContainer extends Component {
       }
     ).finally(() => {
       this.setState({
+        showLoginForm: true,
         isProsessing: false,
       });
     });
@@ -168,6 +171,7 @@ export default class LoginContainer extends Component {
       }
     ).finally(() => {
       this.setState({
+        showLoginForm: true,
         isProsessing: false,
       });
     });

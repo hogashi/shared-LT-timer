@@ -1,3 +1,5 @@
+/* index.scss */
+
 * {
   margin: 0;
   padding: 0;
@@ -50,7 +52,7 @@ html, body, #container, #root {
 }
 #buttonContainer {
   flex: 0 1 auto;
-  display: none;
+  display: flex;
 }
 button {
   display: block;

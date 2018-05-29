@@ -34,8 +34,8 @@ export default class TimerInput extends Component {
   }
 
   _onKeyDown(e) {
+    e.stopPropagation();
     if (e.key === "Enter") {
-      e.stopPropagation();
       this._onMinuteSubmit();
     }
   }
@@ -47,6 +47,10 @@ export default class TimerInput extends Component {
   }
 
   _onMinuteSubmit() {
+    if (!this.props.authenticated) {
+      return;
+    }
+
     const minute = parseInt(this.state.minute);
     if (this._isValidMinute(minute)) {
       this.setState({
@@ -71,11 +75,11 @@ export default class TimerInput extends Component {
       return (
         <div id="buttonContainer">
           <button id="resetButton"
-                  onClick={this._onMinuteSubmit}>
+                  onClick={this._onMinuteSubmit.bind(this)}>
             [re]<br />set
           </button>
           <button id="startStopButton"
-                  onClick={this.props.onStartStopButtonPressed}>
+                  onClick={this.props.onStartStopButtonPressed.bind(this)}>
             start<br />stop
           </button>
         </div>

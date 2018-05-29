@@ -26,7 +26,7 @@ export default class TimerController extends Component {
 
   // args: KeyboardEvent
   _onKeydown(e) {
-    if (!this.state.authenticated) {
+    if (!this.state.authenticated || e.target.getAttribute("id") === "minuteInput") {
       return;
     }
 
@@ -83,7 +83,9 @@ export default class TimerController extends Component {
     const nextSecond = this.state.nowSecond + diff;
     // time is allowed to be between 00:00-99:59
     if (0 <= nextSecond && nextSecond <= 99 * 60 + 59) {
-      this.state.nowSecond = nextSecond;
+      this.setState({
+        nowSecond: nextSecond
+      });
     }
   }
 
@@ -100,7 +102,10 @@ export default class TimerController extends Component {
   _reduceSecond() {
     const { nowSecond } = this.state;
 
-    if (nowSecond <= 0) {
+    this.setState({
+      nowSecond: nowSecond - 1,
+    });
+    if (nowSecond - 1 <= 0) {
       // stop timer
       this.setState({
         nowSecond: 0,
@@ -108,9 +113,6 @@ export default class TimerController extends Component {
       this._stopTimer();
       return;
     }
-    this.setState({
-      nowSecond: nowSecond - 1,
-    });
   }
 
   _startTimer() {
@@ -198,7 +200,8 @@ export default class TimerController extends Component {
       <main id="main"
             className={classNames(isRunning ? "on" : "off", hurry)}>
         <TimerInput authenticated={authenticated}
-                    onMinuteSubmit={this._onMinuteSubmit.bind(this)} />
+                    onMinuteSubmit={this._onMinuteSubmit.bind(this)}
+                    onStartStopButtonPressed={this._switchTimer.bind(this)} />
         {this._renderIndicator()}
         <footer>
           {this._renderOperationDescription()}
