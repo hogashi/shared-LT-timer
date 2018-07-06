@@ -125,10 +125,14 @@ footer {
 }
 #loginInput {
   flex: 0 1 auto;
-  display: block;
-}
-#loginInput div:first-child {
-  margin-bottom: 3px;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+
+  div {
+    margin: 2px 0;
+  }
 }
 #loginInput input {
   width: 200px;
