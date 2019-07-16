@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "classnames": "^2.2.5",
+    "classnames": "^2.2.6",
     "firebase": "^5.0.4",
     "katatema": "^0.1.8",
     "prop-types": "^15.6.1"
