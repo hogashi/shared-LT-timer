@@ -2,6 +2,6 @@
   "extends": [
     "config:base",
     ":masterIssue",
-    ":masterIssueApproved"
+    ":masterIssueApproval"
   ]
 }
